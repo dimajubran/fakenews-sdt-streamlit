@@ -106,6 +106,9 @@ def sweep_param(base_params: Dict[str, float], param_name: str, values: np.ndarr
     for v in values:
         params = dict(base_params)
         params[param_name] = float(v)
+        # Recompute cue-specific human thresholds when Ps changes.
+        if param_name == "Ps":
+            params["Bstar_map"] = compute_bstar_map(params)
         out = compute_outcomes(params)
         rows.append(
             {
@@ -125,7 +128,7 @@ def plot_sweep(
     param_name: str,
     title: str,
     figsize=(8, 5),
-    save_prefix: str = "",
+    save_prefix: str = "simulation",
 ) -> None:
     """Plot Score vs parameter with consistent styling and a fixed Score axis."""
     plt.figure(figsize=figsize)
@@ -133,7 +136,7 @@ def plot_sweep(
     plt.xlabel(param_name)
     plt.ylabel("Score")
     plt.title(title)
-    # Allow matplotlib to autoscale Y for this variant (no fixed -100..100 band).
+    # Let matplotlib auto-scale the y-axis for this variant.
 
     # Use a step of 0.1 for most parameters; Ps is labeled every 0.05 for clarity.
     base_step = 0.1 if param_name != "Ps" else 0.05
@@ -144,8 +147,7 @@ def plot_sweep(
     plt.xticks(ticks)
 
     plt.tight_layout()
-    suffix = f"_{save_prefix}" if save_prefix else ""
-    out_path = f"dima_{param_name}{suffix}_graph.png"
+    out_path = f"{save_prefix}_{param_name}_sweep.png"
     plt.savefig(out_path, dpi=150)
     plt.close()
     print(f"Saved plot: {out_path}")
@@ -222,7 +224,7 @@ if __name__ == "__main__":
     Blow_values = np.round(np.arange(-3.0, -1.0 + 1e-9, 0.1), 2)
     Bhigh_values = np.round(np.arange(1.0, 3.0 + 1e-9, 0.1), 2)
     d_values = np.round(np.arange(1.0, 3.5 + 1e-9, 0.1), 2)
-    Ps_values = np.round(np.arange(0.2, 0.9 + 1e-9, 0.01), 2)
+    Ps_values = np.round(np.arange(0.02, 0.98 + 1e-9, 0.02), 2)
 
     # Run sweeps.
     df_blow = sweep_param(base_params, "Blow", Blow_values)
@@ -232,8 +234,8 @@ if __name__ == "__main__":
     df_ps = sweep_param(base_params, "Ps", Ps_values)
 
     # Generate and save plots with fixed Score axis limits.
-    plot_sweep(df_blow, "Blow", "Score vs Blow (hybrid)")
-    plot_sweep(df_bhigh, "Bhigh", "Score vs Bhigh (hybrid)")
-    plot_sweep(df_dai, "dAI", "Score vs d' AI (hybrid)")
-    plot_sweep(df_dh, "dH", "Score vs d' Human (hybrid)")
-    plot_sweep(df_ps, "Ps", "Score vs Ps (hybrid)")
+    plot_sweep(df_blow, "Blow", "Score vs Blow ")
+    plot_sweep(df_bhigh, "Bhigh", "Score vs Bhigh ")
+    plot_sweep(df_dai, "dAI", "Score vs d' AI ")
+    plot_sweep(df_dh, "dH", "Score vs d' Human ")
+    plot_sweep(df_ps, "Ps", "Score vs Ps ")
