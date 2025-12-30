@@ -23,17 +23,98 @@ st.markdown(
 )
 
 
-def _build_base_params() -> Dict[str, float]:
+BASE_PARAM_DEFAULTS = {
+    "Ps": 0.2,
+    "dH": 2.5,
+    "dAI": 2.5,
+    "Blow": -2.0,
+    "Bhigh": 2.0,
+    "V_TP": 100.0,
+    "V_TN": 100.0,
+    "V_FP": -100.0,
+    "V_FN": -100.0,
+}
+
+
+def _get_base_value(param_name: str) -> float:
+    return float(st.session_state.get(f"base_{param_name}", BASE_PARAM_DEFAULTS[param_name]))
+
+
+def _build_base_params(disabled_param: str | None = None) -> Dict[str, float]:
     st.sidebar.header("Base Case Parameters")
-    Ps = st.sidebar.number_input("Ps", min_value=0.001, max_value=0.999, value=0.2, step=0.01, format="%.2f")
-    dH = st.sidebar.number_input("dH", min_value=0.01, value=2.5, step=0.1, format="%.2f")
-    dAI = st.sidebar.number_input("dAI", min_value=0.0, value=2.5, step=0.1, format="%.2f")
-    Blow = st.sidebar.number_input("Blow", value=-2.0, step=0.1, format="%.2f")
-    Bhigh = st.sidebar.number_input("Bhigh", value=2.0, step=0.1, format="%.2f")
-    V_TP = st.sidebar.number_input("V_TP", value=100.0, step=10.0, format="%.2f")
-    V_TN = st.sidebar.number_input("V_TN", value=100.0, step=10.0, format="%.2f")
-    V_FP = st.sidebar.number_input("V_FP", value=-100.0, step=10.0, format="%.2f")
-    V_FN = st.sidebar.number_input("V_FN", value=-100.0, step=10.0, format="%.2f")
+    Ps = st.sidebar.number_input(
+        "Ps",
+        min_value=0.001,
+        max_value=0.999,
+        value=_get_base_value("Ps"),
+        step=0.01,
+        format="%.2f",
+        disabled=disabled_param == "Ps",
+        key="base_Ps",
+    )
+    dH = st.sidebar.number_input(
+        "dH",
+        min_value=0.01,
+        value=_get_base_value("dH"),
+        step=0.1,
+        format="%.2f",
+        disabled=disabled_param == "dH",
+        key="base_dH",
+    )
+    dAI = st.sidebar.number_input(
+        "dAI",
+        min_value=0.0,
+        value=_get_base_value("dAI"),
+        step=0.1,
+        format="%.2f",
+        disabled=disabled_param == "dAI",
+        key="base_dAI",
+    )
+    Blow = st.sidebar.number_input(
+        "Blow",
+        value=_get_base_value("Blow"),
+        step=0.1,
+        format="%.2f",
+        disabled=disabled_param == "Blow",
+        key="base_Blow",
+    )
+    Bhigh = st.sidebar.number_input(
+        "Bhigh",
+        value=_get_base_value("Bhigh"),
+        step=0.1,
+        format="%.2f",
+        disabled=disabled_param == "Bhigh",
+        key="base_Bhigh",
+    )
+    st.sidebar.header("Payoffs")
+    V_TP = st.sidebar.number_input(
+        "V_TP",
+        value=_get_base_value("V_TP"),
+        step=10.0,
+        format="%.2f",
+        key="base_V_TP",
+    )
+    V_TN = st.sidebar.number_input(
+        "V_TN",
+        value=_get_base_value("V_TN"),
+        step=10.0,
+        format="%.2f",
+        key="base_V_TN",
+    )
+    V_FP = st.sidebar.number_input(
+        "V_FP",
+        value=_get_base_value("V_FP"),
+        step=10.0,
+        format="%.2f",
+        key="base_V_FP",
+    )
+    V_FN = st.sidebar.number_input(
+        "V_FN",
+        value=_get_base_value("V_FN"),
+        step=10.0,
+        format="%.2f",
+        key="base_V_FN",
+    )
 
     return {
         "Ps": Ps,
@@ -48,15 +129,8 @@ def _build_base_params() -> Dict[str, float]:
     }
 
 
-def _build_sweep_controls(base_params: Dict[str, float]) -> Dict[str, float]:
-    st.sidebar.header("Parameter Sweep")
-    param_name = st.sidebar.selectbox(
-        "Sweep parameter",
-        ["Ps", "dH", "dAI", "Blow", "Bhigh", "V_TP", "V_TN", "V_FP", "V_FN"],
-        index=0,
-    )
-
-    current_value = float(base_params[param_name])
+def _build_sweep_controls(param_name: str) -> Dict[str, float]:
+    current_value = _get_base_value(param_name)
     default_min = current_value - 1.0
     default_max = current_value + 1.0
     default_step = 0.1
@@ -107,7 +181,15 @@ def _cached_sweep(
 
 st.title("Fake News Detection Simulation")
 
-base_params = _build_base_params()
+st.sidebar.header("Parameter Sweep")
+sweep_param_name = st.sidebar.selectbox(
+    "Sweep parameter",
+    ["Ps", "dH", "dAI", "Blow", "Bhigh", "V_TP", "V_TN", "V_FP", "V_FN"],
+    index=0,
+)
+
+sweep_controls = _build_sweep_controls(sweep_param_name)
+base_params = _build_base_params(disabled_param=sweep_param_name)
 
 if base_params["Blow"] >= base_params["Bhigh"]:
     st.error("Require Blow < Bhigh for a valid base case.")
@@ -131,8 +213,6 @@ metric_cols[4].metric("FN", f"{base_outcomes['FN']:.4f}")
 st.subheader("Computed B* map")
 st.json(bstar_map)
 
-sweep_controls = _build_sweep_controls(base_params)
-
 if sweep_controls["sweep_min"] >= sweep_controls["sweep_max"]:
     st.error("Sweep min must be less than sweep max.")
     st.stop()
@@ -146,12 +226,24 @@ sweep_df = _cached_sweep(
 )
 
 st.subheader("Score vs Parameter Sweep")
-plot_col, _ = st.columns([0.55, 0.45])
-fig, ax = plt.subplots(figsize=(3.4, 2.0))
-ax.plot(sweep_df[sweep_controls["param_name"]], sweep_df["Score"], marker="o")
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(
+    sweep_df[sweep_controls["param_name"]],
+    sweep_df["Score"],
+    marker="o",
+    linestyle="-",
+)
 ax.set_xlabel(sweep_controls["param_name"])
 ax.set_ylabel("Score")
 ax.set_title(f"Score vs {sweep_controls['param_name']}")
-ax.grid(True, alpha=0.3)
 
-plot_col.pyplot(fig, clear_figure=True)
+base_step = 0.1 if sweep_controls["param_name"] != "Ps" else 0.05
+x_min = sweep_df[sweep_controls["param_name"]].min()
+x_max = sweep_df[sweep_controls["param_name"]].max()
+tick_start = np.floor(x_min / base_step) * base_step
+tick_end = np.ceil(x_max / base_step) * base_step + 1e-12
+ticks = np.arange(tick_start, tick_end + 0.5 * base_step, base_step)
+ax.set_xticks(ticks)
+
+st.pyplot(fig, clear_figure=True)
+
