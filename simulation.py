@@ -11,6 +11,8 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # Order of AI recommendations (Fake, Middle, Real) used throughout.
