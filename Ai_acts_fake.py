@@ -11,6 +11,8 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # Precompute sqrt(2) for Gaussian CDF/SF calculations with math.erf/erfc.
