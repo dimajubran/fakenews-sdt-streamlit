@@ -3,7 +3,7 @@ import subprocess
 import importlib.util
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-
+import sys
 import streamlit as st
 
 st.set_page_config(layout="wide")
@@ -140,7 +140,7 @@ def _compute_results(module, tab_label: str, base_params: Dict[str, float]) -> D
 
 def _run_simulation(script: str, payload: Dict[str, Any]) -> Dict[str, Any]:
     cmd = [
-        "python3",
+        sys.executable,                
         str(ROOT_DIR / script),
         "--params_json",
         json.dumps(payload),
@@ -151,7 +151,6 @@ def _run_simulation(script: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         "stdout": result.stdout,
         "stderr": result.stderr,
     }
-
 
 def _render_sidebar() -> Dict[str, Any]:
     with st.sidebar:
