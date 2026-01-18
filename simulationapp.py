@@ -3,10 +3,20 @@ import subprocess
 import importlib.util
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-import sys
+
 import streamlit as st
 
 st.set_page_config(layout="wide")
+st.markdown(
+    """
+    <style>
+      .stTabs [data-baseweb="tab"] p {
+        font-size: 1.1rem;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 ROOT_DIR = Path(__file__).resolve().parent
 
@@ -140,7 +150,7 @@ def _compute_results(module, tab_label: str, base_params: Dict[str, float]) -> D
 
 def _run_simulation(script: str, payload: Dict[str, Any]) -> Dict[str, Any]:
     cmd = [
-        sys.executable,                
+        "python3",
         str(ROOT_DIR / script),
         "--params_json",
         json.dumps(payload),
@@ -151,6 +161,7 @@ def _run_simulation(script: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         "stdout": result.stdout,
         "stderr": result.stderr,
     }
+
 
 def _render_sidebar() -> Dict[str, Any]:
     with st.sidebar:
@@ -283,12 +294,33 @@ for tab, cfg in zip(tabs, TAB_CONFIGS):
         outcomes = state["computed"]["outcomes"] if state else None
         bstar_map = state["computed"]["bstar_map"] if state else None
 
-        metrics_cols = st.columns(5)
-        metrics = ["Score", "TP", "TN", "FP", "FN"]
-        for col, metric in zip(metrics_cols, metrics):
-            value = outcomes.get(metric) if outcomes else None
+        metrics_cols = st.columns(7)
+        metrics = [
+            ("Score", "Score"),
+            ("TP", r"$P_{TP}$"),
+            ("TN", r"$P_{TN}$"),
+            ("FP", r"$P_{FP}$"),
+            ("FN", r"$P_{FN}$"),
+            ("TPR", r"$\frac{TP}{TP+FN}$"),
+            ("FPR", r"$\frac{FP}{FP+TN}$"),
+        ]
+        for col, (key, label) in zip(metrics_cols, metrics):
+            if outcomes and key in ("TPR", "FPR"):
+                tp = outcomes.get("TP")
+                fn = outcomes.get("FN")
+                fp = outcomes.get("FP")
+                tn = outcomes.get("TN")
+                if key == "TPR":
+                    denom = (tp + fn) if isinstance(tp, (int, float)) and isinstance(fn, (int, float)) else None
+                    value = (tp / denom) if denom else None
+                else:
+                    denom = (fp + tn) if isinstance(fp, (int, float)) and isinstance(tn, (int, float)) else None
+                    value = (fp / denom) if denom else None
+            else:
+                value = outcomes.get(key) if outcomes else None
             display = f"{value:.4f}" if isinstance(value, (int, float)) else "—"
-            col.metric(metric, display)
+            col.markdown(label)
+            col.markdown(display)
 
         st.markdown("## Computed B* map")
         st.json(bstar_map if bstar_map is not None else {})
