@@ -15,8 +15,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# Precompute sqrt(2) for Gaussian CDF/SF calculations with math.erf/erfc.  שורש של 2
-SQRT2 = np.sqrt(2.0)  # שורש של 2
+# Precompute sqrt(2) for Gaussian CDF/SF calculations with math.erf/erfc.
+SQRT2 = np.sqrt(2.0)
 
 
 def std_norm_cdf(x: np.ndarray) -> np.ndarray:
@@ -76,9 +76,9 @@ def compute_outcomes(params: Dict[str, float]) -> Dict[str, float]:
 
     # --- Single Bayes-optimal human threshold ---
     payoff_ratio = (V_TN - V_FP) / (V_TP - V_FN)
-    beta_h = ((1.0 - Ps_h) / Ps_h) * payoff_ratio
+    beta_h = ((1.0 - Ps_h) / Ps_h) * payoff_ratio #
     beta_h = max(beta_h, eps)
-    B_h_star = dH / 2.0 + math.log(beta_h) / dH
+    B_h_star = dH / 2.0 + math.log(beta_h) / dH 
 
     p_h_fake_given_S = float(std_norm_sf(np.array([B_h_star - dH]))[0])
     p_h_fake_given_N = float(std_norm_sf(np.array([B_h_star]))[0])
@@ -98,8 +98,9 @@ def compute_outcomes(params: Dict[str, float]) -> Dict[str, float]:
     FP = FP_AI + FP_H
     TN = TN_AI + TN_H
     FN = FN_AI + FN_H
+    # print(Ps, pS_S, TN_AI)
 
-    Score = TP * V_TP + TN * V_TN + FP * V_FP + FN * V_FN
+    Score = Ps * (pS_S * V_TP + pM_S * (p_h_fake_given_S * V_TP + (1 - p_h_fake_given_S) * V_FN) + pN_S * V_FN) + Pn * (pS_N * V_FP + pM_N * (p_h_fake_given_N * V_FP + (1 - p_h_fake_given_N) * V_TN) + pN_N * V_TN)
 
     return {
         "TP": TP,
@@ -164,7 +165,7 @@ def plot_sweep(
 
 def _default_base_params() -> Dict[str, float]:
     return {
-        "Ps": 0.2,
+        "Ps": 0.5,
         "dH": 2.5,
         "dAI": 2.5,
         "Blow": -2.0,
@@ -232,3 +233,4 @@ if __name__ == "__main__":
     plot_sweep(df_dai, "dAI", "Score vs d' AI ", save_prefix=save_prefix)
     plot_sweep(df_dh, "dH", "Score vs d' Human ", save_prefix=save_prefix)
     plot_sweep(df_ps, "Ps", "Score vs Ps ", save_prefix=save_prefix)
+    #print(std_norm_sf(np.array([0])))
