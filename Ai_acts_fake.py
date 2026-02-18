@@ -14,21 +14,16 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
-# Precompute sqrt(2) for Gaussian CDF/SF calculations with math.erf/erfc.
-SQRT2 = np.sqrt(2.0)
-
+from scipy.stats import norm
 
 def std_norm_cdf(x: np.ndarray) -> np.ndarray:
-    """Standard normal CDF using math.erf applied elementwise."""
-    erf_vec = np.vectorize(math.erf)
-    return 0.5 * (1.0 + erf_vec(x / SQRT2))
+    """Standard normal CDF."""
+    return norm.cdf(x)
 
 
 def std_norm_sf(x: np.ndarray) -> np.ndarray:
-    """Standard normal survival function (1 - CDF) via math.erfc."""
-    erfc_vec = np.vectorize(math.erfc)
-    return 0.5 * erfc_vec(x / SQRT2)
+    """Standard normal survival function (1 - CDF)."""
+    return norm.sf(x)
 
 
 def _validate_params(params: Dict[str, float]) -> None:
