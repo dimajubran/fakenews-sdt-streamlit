@@ -6,8 +6,6 @@ Instead of treating AI as a black-box classifier, the simulator models **decisio
 
 The system is deployed as a **Streamlit web app**, allowing real-time exploration of different Human–AI collaboration strategies.
 
----
-
 ## What This Project Does
 
 - Simulates fake-news detection as a signal detection process  
@@ -19,7 +17,6 @@ The system is deployed as a **Streamlit web app**, allowing real-time exploratio
   - Accuracy  
 - Visualizes how changing parameters affects outcomes  
 
----
 
 ## Architectures Implemented  
 - Human-first → AI assist  
@@ -30,8 +27,7 @@ Each architecture allows adjusting:
 - Sensitivity (d′)  
 - Decision thresholds  
 - Noise assumptions  
----
-
+  
 ## Key Files
 
 | File | Purpose |
