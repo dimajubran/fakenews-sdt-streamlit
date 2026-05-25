@@ -393,3 +393,9 @@ for tab, cfg in zip(tabs, TAB_CONFIGS):
 
 
 #streamlit run simulationapp.py
+""" 
+git status
+git add .
+git commit -m "Fix Bstar calculation"
+git push
+"""
