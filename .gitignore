@@ -1,4 +1,9 @@
 __pycache__/
 .DS_Store
 
+# Commands to update GitHub after changing files:
+# git status
+# git add .
+# git commit -m "Describe what changed"
+# git push
 
