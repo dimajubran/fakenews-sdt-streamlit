@@ -21,7 +21,6 @@ st.markdown(
 )
 
 ROOT_DIR = Path(__file__).resolve().parent
-PLOT_WIDTH_PX = 780
 
 # One tab per architecture script.
 TAB_CONFIGS = [
@@ -379,7 +378,7 @@ for tab, cfg in zip(tabs, TAB_CONFIGS):
         sorted_pngs = _sort_pngs(png_paths, inputs["sweep_param"])
 
         if sorted_pngs:
-            st.image(str(sorted_pngs[0]), width=PLOT_WIDTH_PX)
+            st.image(str(sorted_pngs[0]), use_container_width=True)
         else:
             st.info("Run a simulation to generate plots.")
 

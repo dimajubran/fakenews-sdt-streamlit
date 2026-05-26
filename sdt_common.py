@@ -64,14 +64,16 @@ def ai_region_probabilities(params: Dict[str, float]) -> Dict[str, float]:
     dAI = float(params["dAI"])
     Blow = float(params["Blow"])
     Bhigh = float(params["Bhigh"])
+    mu_N = -dAI / 2.0
+    mu_S = dAI / 2.0
 
-    pNp_N = std_norm_cdf(Blow)
-    pMp_N = std_norm_cdf(Bhigh) - std_norm_cdf(Blow)
-    pSp_N = std_norm_sf(Bhigh)
+    pNp_N = std_norm_cdf(Blow - mu_N)
+    pMp_N = std_norm_cdf(Bhigh - mu_N) - std_norm_cdf(Blow - mu_N)
+    pSp_N = std_norm_sf(Bhigh - mu_N)
 
-    pNp_S = std_norm_cdf(Blow - dAI)
-    pMp_S = std_norm_cdf(Bhigh - dAI) - std_norm_cdf(Blow - dAI)
-    pSp_S = std_norm_sf(Bhigh - dAI)
+    pNp_S = std_norm_cdf(Blow - mu_S)
+    pMp_S = std_norm_cdf(Bhigh - mu_S) - std_norm_cdf(Blow - mu_S)
+    pSp_S = std_norm_sf(Bhigh - mu_S)
 
     return {
         "pSp_S": pSp_S,
@@ -116,19 +118,21 @@ def bstar_for_posterior(
     eps: float = 1e-15,
 ) -> float:
     # Normative SDT threshold:
-    # B* = dH/2 + ln(beta)/dH,  beta = (P(N|cue)/P(S|cue))*payoff_ratio.
+    # B* = ln(beta)/dH,  beta = (P(N|cue)/P(S|cue))*payoff_ratio.
     posterior_S_safe = min(max(posterior_S, eps), 1.0 - eps)
     posterior_N_safe = 1.0 - posterior_S_safe
     beta = (posterior_N_safe / posterior_S_safe) * payoff_ratio_value
     if beta <= 0.0:
         raise ValueError("beta must be positive.")
-    return dH / 2.0 + math.log(beta) / dH
+    return math.log(beta) / dH
 
 
 def human_sh_probabilities(dH: float, bstar: float) -> Tuple[float, float]:
     # Human chooses Sh when x_h > B*.
-    pSh_S = std_norm_sf(bstar - dH)
-    pSh_N = std_norm_sf(bstar)
+    mu_N = -dH / 2.0
+    mu_S = dH / 2.0
+    pSh_S = std_norm_sf(bstar - mu_S)
+    pSh_N = std_norm_sf(bstar - mu_N)
     return pSh_S, pSh_N
 
 
