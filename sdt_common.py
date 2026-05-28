@@ -84,7 +84,6 @@ def ai_region_probabilities(params: Dict[str, float]) -> Dict[str, float]:
         "pNp_N": pNp_N,
     }
 
-
 def payoff_ratio(params: Dict[str, float]) -> float:
     # Utility term that converts posterior odds into normative beta.
     VTP = float(params["VTP"])
