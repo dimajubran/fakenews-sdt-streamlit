@@ -2,6 +2,7 @@ import math
 import os
 import tempfile
 from typing import Callable, Dict, Iterable, Tuple
+from unittest import result
 
 import numpy as np
 import pandas as pd
@@ -83,6 +84,10 @@ def ai_region_probabilities(params: Dict[str, float]) -> Dict[str, float]:
         "pMp_N": pMp_N,
         "pNp_N": pNp_N,
     }
+
+params = {"dAI": 1, "Blow": -1,"Bhigh": 1}
+#print(ai_region_probabilities(params))
+
 
 def payoff_ratio(params: Dict[str, float]) -> float:
     # Utility term that converts posterior odds into normative beta.
@@ -280,3 +285,64 @@ def report_sweep_ranges() -> Dict[str, np.ndarray]:
         "dH": np.round(np.arange(1.5, 3.5 + 1e-9, 0.1), 2),
         "Ps": np.round(np.arange(0.05, 0.95 + 1e-9, 0.02), 2),
     }
+
+#######################################Part B 
+
+def fake_real_distribution_across_ai_regions(Ps: float, Blow: float, Bhigh: float, dAI: float) -> dict:
+    """
+    Calculates how fake and real items are distributed across the 3 AI regions.
+
+    Outputs are joint probabilities:
+    - P(fake and middle)
+    - P(real and middle)
+    - P(fake and upper)
+    - P(real and upper)
+    - P(fake and lower)
+    - P(real and lower)
+
+    All 6 values together should sum to 1.
+    """
+
+    if not (0.0 < Ps < 1.0):
+        raise ValueError("Ps must be between 0 and 1.")
+
+    if Blow >= Bhigh:
+        raise ValueError("Require Blow < Bhigh.")
+
+    if dAI < 0:
+        raise ValueError("dAI must be >= 0.")
+
+    params = {
+        "Ps": Ps,
+        "Blow": Blow,
+        "Bhigh": Bhigh,
+        "dAI": dAI,
+    }
+
+    ai = ai_region_probabilities(params)
+
+    P_fake = Ps
+    P_real = 1.0 - Ps
+
+    result = {
+        "fake_lower": P_fake * ai["pNp_S"],
+        "real_lower": P_real * ai["pNp_N"],
+
+        "fake_middle": P_fake * ai["pMp_S"],
+        "real_middle": P_real * ai["pMp_N"],
+
+        "fake_upper": P_fake * ai["pSp_S"],
+        "real_upper": P_real * ai["pSp_N"],
+    }
+
+    return result
+
+result = fake_real_distribution_across_ai_regions(
+        Ps=0.5,
+        Blow=-1,
+        Bhigh=1,
+        dAI=1
+    )
+
+for key, value in result.items():
+    print(key,"=",value)
