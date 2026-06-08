@@ -286,7 +286,7 @@ def report_sweep_ranges() -> Dict[str, np.ndarray]:
         "Ps": np.round(np.arange(0.05, 0.95 + 1e-9, 0.02), 2),
     }
 
-#######################################Part B 
+####################################### Part B #######################################
 
 def fake_real_distribution_across_ai_regions(Ps: float, Blow: float, Bhigh: float, dAI: float) -> dict:
     """
