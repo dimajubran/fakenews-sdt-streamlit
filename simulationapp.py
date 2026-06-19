@@ -4,7 +4,7 @@ import importlib.util
 import traceback
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -136,10 +136,10 @@ def _compute_results(module, tab_label: str, base_params: Dict[str, float]) -> D
 
 def _run_simulation(script: str, payload: Dict[str, Any]) -> Dict[str, Any]:
     cmd = [
-        "python3",
-        str(ROOT_DIR / script),
-        "--params_json",
-        json.dumps(payload),
+    sys.executable,
+    str(ROOT_DIR / script),
+    "--params_json",
+    json.dumps(payload),
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT_DIR)
     return {
