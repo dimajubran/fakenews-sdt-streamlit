@@ -3,13 +3,6 @@ import pandas as pd
 
 
 def generate_labels(n_items, ps, rng):
-    """
-    Generate true labels according to Ps.
-
-    signal = fake
-    noise = real
-    """
-
     n_signal = int(n_items * ps)
     n_noise = n_items - n_signal
 
@@ -21,9 +14,6 @@ def generate_labels(n_items, ps, rng):
 
 
 def force_exact_mean_and_sd(values, target_mean, target_sd):
-    """
-    Force exact sample mean and sample SD.
-    """
 
     values = np.array(values)
 
@@ -41,17 +31,7 @@ def force_exact_mean_and_sd(values, target_mean, target_sd):
 
 
 def sample_sdt_values(labels, dprime, sd, rng):
-    """
-    Generate SDT evidence values.
-
-    signal/fake:
-        mean = +dprime / 2
-        sd = 1
-
-    noise/real:
-        mean = -dprime / 2
-        sd = 1
-    """
+    
 
     labels = np.array(labels)
     values = np.zeros(len(labels))
@@ -93,18 +73,6 @@ def sample_sdt_values(labels, dprime, sd, rng):
 
 
 def generate_ai_classification(x_ai, blow, bhigh):
-    """
-    Generate AI classification according to two thresholds.
-
-    x_ai < Blow:
-        noise
-
-    Blow <= x_ai <= Bhigh:
-        uncertain
-
-    x_ai > Bhigh:
-        signal
-    """
 
     if x_ai < blow:
         return "noise"
@@ -126,13 +94,6 @@ def generate_one_block(
     sd,
     seed
 ):
-    """
-    Generate one block inside one condition.
-
-    block 1: 10 items
-    block 2: 10 items
-    block 3: 100 items
-    """
 
     rng = np.random.default_rng(seed)
 
@@ -193,12 +154,7 @@ def generate_one_condition(
     sd,
     seed
 ):
-    """
-    Generate one condition with 3 blocks.
 
-    Total:
-    10 + 10 + 100 = 120 items.
-    """
 
     block_sizes = {
         1: 10,
@@ -263,16 +219,7 @@ def generate_experiment_sets(
     output_file="experiment_data.csv",
     seed=123
 ):
-    """
-    Generate 8 conditions:
 
-    2 dprime_ai values
-    2 dprime_human values
-    2 threshold distances
-
-    Each condition has 120 items.
-    Final CSV has 960 rows.
-    """
 
     conditions = []
     condition_id = 1
